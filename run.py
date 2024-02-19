@@ -1,3 +1,4 @@
+import os
 import torch
 import numpy as np
 import random
@@ -20,7 +21,8 @@ def initialize(seed=SEED):
     torch.cuda.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
     torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = True
+    torch.backends.cudnn.benchmark = False
+    os.environ['PYTHONHASHSEED'] = str(seed)
     torch.set_float32_matmul_precision('medium')
 
 
@@ -36,18 +38,10 @@ if __name__ == "__main__":
         image_size=IMAGE_SIZE,
         eval_batch_size=BATCH_SIZE,
         train_batch_size=BATCH_SIZE,
-        seed=1234,
+        seed=SEED,
     )
 
     model = EfficientAd(input_size=IMAGE_SIZE)
-
-    early_stopping = EarlyStopping(
-        monitor="image_AUROC",
-        min_delta=0.01,
-        patience=10,
-        verbose=True,
-        mode="min"
-    )
 
     engine = Engine(
         task=TaskType.CLASSIFICATION,
@@ -55,19 +49,17 @@ if __name__ == "__main__":
         pixel_metrics=['F1Score', 'AUROC'],
         accelerator="gpu",
         devices=1,
-        callbacks=[early_stopping],
+        callbacks=[EarlyStopping(monitor="image_AUROC", mode="min", min_delta=0.01, patience=10)],
     )
 
     engine.fit(
         datamodule=datamodule,
         model=model,
-        ckpt_path="weights/" + model.__class__.__name__,
     )
 
     result = engine.test(
         datamodule=datamodule,
         model=model,
-        ckpt_path="weights/" + model.__class__.__name__,
     )
 
     print(result)
