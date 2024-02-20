@@ -47,7 +47,7 @@ if __name__ == "__main__":
             seed=SEED,
         )
 
-        model = Patchcore(input_size=IMAGE_SIZE)
+        model = EfficientAd(input_size=IMAGE_SIZE)
 
         engine = Engine(
             task=TaskType.CLASSIFICATION,
@@ -71,12 +71,12 @@ if __name__ == "__main__":
         f1_score_list.append(result[0]['image_F1Score'])
         auroc_list.append(result[0]['image_AUROC'])
 
-    print("image_F1Score")
-    print("mean :", np.mean(f1_score_list))
-    print("variance :", np.var(f1_score_list))
-    print(f1_score_list)
-    print()
     print("image_AUROC")
     print("mean :", np.mean(auroc_list))
     print("variance :", np.var(auroc_list))
     print(auroc_list)
+    print()
+    print("image_F1Score")
+    print("mean :", np.mean(f1_score_list))
+    print("variance :", np.var(f1_score_list))
+    print(f1_score_list)
