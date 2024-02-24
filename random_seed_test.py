@@ -1,3 +1,4 @@
+import gc
 import os
 import torch
 import numpy as np
@@ -10,7 +11,7 @@ from anomalib.engine import Engine
 from anomalib import TaskType
 
 SEED = 1234
-BATCH_SIZE = 32
+BATCH_SIZE = 16
 IMAGE_SIZE = (512, 512)
 
 
@@ -55,7 +56,7 @@ if __name__ == "__main__":
             pixel_metrics=['F1Score', 'AUROC'],
             accelerator="gpu",
             devices=1,
-            callbacks=[EarlyStopping(monitor="image_AUROC", mode="min", min_delta=0.0001, patience=10)],
+            # callbacks=[EarlyStopping(monitor="image_AUROC", mode="min", min_delta=0.0001, patience=10)],
         )
 
         engine.fit(
@@ -70,6 +71,8 @@ if __name__ == "__main__":
 
         f1_score_list.append(result[0]['image_F1Score'])
         auroc_list.append(result[0]['image_AUROC'])
+        collected = gc.collect()
+
 
     print("image_F1Score")
     print("mean :", np.mean(f1_score_list))
